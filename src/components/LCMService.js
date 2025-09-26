@@ -14,18 +14,19 @@ const lcmLogic = {
   
   // LCM calculation: LCM(a,b) = (a * b) / GCD(a,b)
   lcm: (x, y) => {
-    // Special case for lcm(0,0) = 0 (mathematical definition)
+    // Special case for lcm(0,0) = 0
     if (x === 0n && y === 0n) return 0n;
     // If either is 0, lcm = 0
     if (x === 0n || y === 0n) return 0n;
-    // Standard LCM formula
-    return (x * y) / lcmLogic.gcd(x, y);
+    // Standard LCM formula for positive numbers
+    const result = (x * y) / lcmLogic.gcd(x, y);
+    // Ensure we return integer (avoid float issues in JavaScript)
+    return result;
   },
   
-  // Check if input is a natural number (positive integer)
+  // Check if input is a natural number (non-negative integer: 0, 1, 2, 3, ...)
   isNaturalNumber: (str) => {
-    // Natural numbers are positive integers: 1, 2, 3, 4, ...
-    // Task says "natural numbers" - these are positive integers only
+    // For this task: Natural numbers include 0, 1, 2, 3, 4, ...
     if (str === null || str === undefined || str === '') return false;
     
     const trimmed = String(str).trim();
@@ -36,8 +37,8 @@ const lcmLogic = {
     
     try {
       const num = BigInt(trimmed);
-      // Natural numbers are > 0 (positive integers)
-      return num > 0n;
+      // Natural numbers are >= 0 (includes zero!)
+      return num >= 0n;
     } catch {
       return false;
     }
@@ -98,7 +99,7 @@ const InfoPage = () => (
     <h3>Rules:</h3>
     <ul>
       <li>Returns plain text (digits only or "NaN")</li>
-      <li>Accepts only natural numbers (positive integers)</li>
+      <li>Accepts natural numbers (0, 1, 2, 3, ...)</li>
       <li>Invalid inputs return "NaN"</li>
     </ul>
   </div>
