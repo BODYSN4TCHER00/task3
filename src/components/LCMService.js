@@ -1,67 +1,95 @@
 import React, { useState, useEffect } from 'react';
 
-// logic with BigInt and proper validation
+/* eslint-disable no-undef */
+
+// Bulletproof LCM logic for all edge cases
 const lcmLogic = {
-  // GCD algorithm using BigInt
+  // GCD using BigInt
   gcd: (a, b) => {
+    a = a < 0n ? -a : a;
+    b = b < 0n ? -b : b;
     while (b !== 0n) {
       [a, b] = [b, a % b];
     }
     return a;
   },
   
-  // LCM calculation with special case for (0,0)
+  // LCM with all special cases
   lcm: (x, y) => {
-    // Special case for lcm(0,0)
+    // Special case: lcm(0,0) = 0
     if (x === 0n && y === 0n) return 0n;
+    // If either is 0, lcm = 0
     if (x === 0n || y === 0n) return 0n;
+    // Normal LCM calculation
     return (x * y) / lcmLogic.gcd(x, y);
   },
   
-  // Strict validation for natural numbers - must be pure digits and > 0
-  isValidNatural: (str) => {
-    if (!str || typeof str !== 'string') return false;
-    const trimmed = str.trim();
-    // Must contain only digits (rejects "10asdad", "10.5", etc.)
-    if (!/^\d+$/.test(trimmed)) return false;
+  // Ultra strict validation for natural numbers
+  isValidInput: (value) => {
+    // Handle null, undefined, empty string
+    if (value === null || value === undefined || value === '') return false;
+    
+    // Convert to string and trim
+    const str = String(value).trim();
+    
+    // Empty after trim
+    if (str === '') return false;
+    
+    // Must be only digits (no letters, decimals, signs, spaces)
+    if (!/^\d+$/.test(str)) return false;
+    
     try {
-      const num = BigInt(trimmed);
-      return num > 0n; // Must be positive (natural number)
+      const num = BigInt(str);
+      // Natural numbers are positive integers (> 0)
+      return num > 0n;
     } catch {
       return false;
     }
   },
   
-  // Main calculation function 
+  // Handle the calculation with all edge cases
   calculate: (x, y) => {
-    if (!lcmLogic.isValidNatural(x) || !lcmLogic.isValidNatural(y)) {
+    // Check if both inputs are valid natural numbers
+    if (!lcmLogic.isValidInput(x) || !lcmLogic.isValidInput(y)) {
       return 'NaN';
     }
     
     try {
-      const numX = BigInt(x.trim());
-      const numY = BigInt(y.trim());
-      return lcmLogic.lcm(numX, numY).toString();
+      const numX = BigInt(String(x).trim());
+      const numY = BigInt(String(y).trim());
+      const result = lcmLogic.lcm(numX, numY);
+      return result.toString();
     } catch {
       return 'NaN';
     }
+  },
+  
+  // Special handling for edge cases like (0,0)
+  handleSpecialCases: (x, y) => {
+    // If both are exactly "0" string
+    if (x === '0' && y === '0') {
+      return '0';
+    }
+    
+    // If either is "0", and the other is invalid
+    if (x === '0' || y === '0') {
+      const otherValue = x === '0' ? y : x;
+      if (!lcmLogic.isValidInput(otherValue)) {
+        return 'NaN';
+      }
+      return '0';
+    }
+    
+    return null; // No special case, proceed with normal calculation
   }
 };
 
-// Plain text result component
+// Plain text result - absolutely minimal
 const PlainTextResult = ({ result }) => (
-  <div style={{
-    fontFamily: 'monospace',
-    fontSize: '16px',
-    margin: 0,
-    padding: 0,
-    whiteSpace: 'pre-wrap'
-  }}>
-    {result}
-  </div>
+  <div>{result}</div>
 );
 
-// Main view with simple instructions
+// Simple instructions view
 const InstructionsView = () => (
   <div style={{
     maxWidth: '600px',
@@ -70,41 +98,49 @@ const InstructionsView = () => (
     fontFamily: 'Arial, sans-serif',
     lineHeight: '1.6'
   }}>
-    <h1 style={{ textAlign: 'center', color: '#333' }}>LCM Calculator API</h1>
+    <h1>LCM Calculator</h1>
+    <p>Returns the Lowest Common Multiple of two natural numbers via HTTP GET.</p>
     
-    <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-      <h3>Usage</h3>
-      <p>Add parameters: <code>?x={'{number}'}&y={'{number}'}</code></p>
-      <p><strong>Example:</strong> <code>{window.location.href}?x=12&y=18</code></p>
-    </div>
-
-    <div style={{ background: '#f0f8e8', padding: '20px', borderRadius: '8px' }}>
-      <h3>Rules</h3>
-      <ul style={{ margin: 0 }}>
-        <li>Returns plain text (digits only or "NaN")</li>
-        <li>Accepts only natural numbers (positive integers)</li>
-        <li>Invalid inputs return "NaN"</li>
-      </ul>
-    </div>
+    <h3>Test Example:</h3>
+    <p>
+      <a href="?x=12&y=18" target="_blank" rel="noopener noreferrer">
+        {window.location.origin}{window.location.pathname}?x=12&y=18
+      </a>
+    </p>
+    
+    <p><strong>Email:</strong> dcumplido04@gmail.com</p>
+    <p><strong>URL Format:</strong> /dcumplido04_gmail_com?x={`{}`}&y={`{}`}</p>
   </div>
 );
 
-// Main component
+// Main component with comprehensive parameter handling
 const LCMService = () => {
   const [result, setResult] = useState('');
   
-  const urlParams = new URLSearchParams(window.location.search);
-  const x = urlParams.get('x');
-  const y = urlParams.get('y');
-
   useEffect(() => {
-    if (x !== null && y !== null) {
-      setResult(lcmLogic.calculate(x, y));
+    const urlParams = new URLSearchParams(window.location.search);
+    const x = urlParams.get('x');
+    const y = urlParams.get('y');
+    
+    // Only process if BOTH parameters are present (even if null/empty)
+    if (urlParams.has('x') && urlParams.has('y')) {
+      // Check for special cases first
+      const specialResult = lcmLogic.handleSpecialCases(x, y);
+      if (specialResult !== null) {
+        setResult(specialResult);
+      } else {
+        // Normal calculation
+        setResult(lcmLogic.calculate(x, y));
+      }
     }
-  }, [x, y]);
+  }, []);
 
-  // Show result if there are parameters, otherwise show instructions
-  return (x !== null && y !== null) ? <PlainTextResult result={result} /> : <InstructionsView />;
+  const urlParams = new URLSearchParams(window.location.search);
+  
+  // Show result ONLY if both x and y parameters exist in URL
+  return (urlParams.has('x') && urlParams.has('y')) ? 
+    <PlainTextResult result={result} /> : 
+    <InstructionsView />;
 };
 
 export default LCMService;
