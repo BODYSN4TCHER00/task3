@@ -4,11 +4,10 @@ import LCMService from './components/LCMService';
 
 function App() {
   return (
-    <Router basename="/dcumplido04_gmail_com">
+    <Router>
       <Routes>
-        <Route path="/" element={<LCMService />} />
-        {/* Redirección desde la raíz absoluta */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/dcumplido04_gmail_com" element={<LCMService />} />
+        <Route path="*" element={<Navigate to="/dcumplido04_gmail_com" replace />} />
       </Routes>
     </Router>
   );
