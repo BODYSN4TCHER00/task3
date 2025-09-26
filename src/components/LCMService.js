@@ -1,31 +1,54 @@
 import React, { useState, useEffect } from 'react';
 
-// logic
+// logic with BigInt and proper validation
 const lcmLogic = {
-  // algorithm 
+  // GCD algorithm using BigInt
   gcd: (a, b) => {
-    while (b !== 0) {
+    while (b !== 0n) {
       [a, b] = [b, a % b];
     }
     return a;
   },
   
-  // lcm calculation formula
-  lcm: (x, y) => x === 0 || y === 0 ? 0 : Math.abs(x * y) / lcmLogic.gcd(x, y),
+  // LCM calculation with special case for (0,0)
+  lcm: (x, y) => {
+    // Special case for lcm(0,0)
+    if (x === 0n && y === 0n) return 0n;
+    if (x === 0n || y === 0n) return 0n;
+    return (x * y) / lcmLogic.gcd(x, y);
+  },
   
-  // natural number check
-  isNatural: (num) => Number.isInteger(num) && num > 0,
+  // Strict validation for natural numbers - must be pure digits and > 0
+  isValidNatural: (str) => {
+    if (!str || typeof str !== 'string') return false;
+    const trimmed = str.trim();
+    // Must contain only digits (rejects "10asdad", "10.5", etc.)
+    if (!/^\d+$/.test(trimmed)) return false;
+    try {
+      const num = BigInt(trimmed);
+      return num > 0n; // Must be positive (natural number)
+    } catch {
+      return false;
+    }
+  },
   
-  // main calculation function 
+  // Main calculation function 
   calculate: (x, y) => {
-    const [numX, numY] = [Number(x), Number(y)];
-    return isNaN(numX) || isNaN(numY) || !lcmLogic.isNatural(numX) || !lcmLogic.isNatural(numY)
-      ? 'NaN'
-      : lcmLogic.lcm(numX, numY).toString();
+    if (!lcmLogic.isValidNatural(x) || !lcmLogic.isValidNatural(y)) {
+      return 'NaN';
+    }
+    
+    try {
+      const numX = BigInt(x.trim());
+      const numY = BigInt(y.trim());
+      return lcmLogic.lcm(numX, numY).toString();
+    } catch {
+      return 'NaN';
+    }
   }
 };
 
-// plain text result
+// Plain text result component
 const PlainTextResult = ({ result }) => (
   <div style={{
     fontFamily: 'monospace',
@@ -38,7 +61,7 @@ const PlainTextResult = ({ result }) => (
   </div>
 );
 
-// main view
+// Main view with simple instructions
 const InstructionsView = () => (
   <div style={{
     maxWidth: '600px',
@@ -66,19 +89,22 @@ const InstructionsView = () => (
   </div>
 );
 
-// url parameters
+// Main component
 const LCMService = () => {
   const [result, setResult] = useState('');
   
   const urlParams = new URLSearchParams(window.location.search);
-  const [x, y] = [urlParams.get('x'), urlParams.get('y')];
+  const x = urlParams.get('x');
+  const y = urlParams.get('y');
 
   useEffect(() => {
-    if (x && y) setResult(lcmLogic.calculate(x, y));
+    if (x !== null && y !== null) {
+      setResult(lcmLogic.calculate(x, y));
+    }
   }, [x, y]);
 
-  // show result if there are parameters only
-  return x && y ? <PlainTextResult result={result} /> : <InstructionsView />;
+  // Show result if there are parameters, otherwise show instructions
+  return (x !== null && y !== null) ? <PlainTextResult result={result} /> : <InstructionsView />;
 };
 
 export default LCMService;
