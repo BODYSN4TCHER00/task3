@@ -22,9 +22,10 @@ const lcmLogic = {
     if (x === 0n && y === 0n) return 0n;
     if (x === 0n || y === 0n) return 0n;
     
-    // For positive numbers, use standard LCM formula with BigInt
+    // For positive numbers, use standard LCM formula with BigInt division
     const gcdValue = lcmLogic.gcd(x, y);
-    return (x * y) / gcdValue;
+    // Use BigInt division to avoid floating point precision issues
+    return (x / gcdValue) * y;
   },
   
   // Check if input is a natural number (0, 1, 2, 3, ... - includes 0!)
