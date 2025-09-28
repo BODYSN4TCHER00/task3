@@ -67,9 +67,8 @@ const lcmLogic = {
 };
 
 // Component for plain text result (no HTML formatting)
-const PlainResult = ({ result }) => (
-    {result}
-);
+const PlainResult = ({ result }) => result;
+
 
 // Simple info page when no parameters
 const InfoPage = () => (
