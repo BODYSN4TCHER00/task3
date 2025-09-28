@@ -66,10 +66,6 @@ const lcmLogic = {
   }
 };
 
-// Component for plain text result (no HTML formatting)
-const PlainResult = ({ result }) => result;
-
-
 // Simple info page when no parameters
 const InfoPage = () => (
   <div style={{
@@ -127,14 +123,19 @@ const LCMService = () => {
     if (urlParams.has('x') && urlParams.has('y')) {
       const calculatedResult = lcmLogic.calculate(x, y);
       setResult(calculatedResult);
+      
+      // For plain text output - replace entire page content
+      document.body.innerHTML = calculatedResult;
+      document.title = calculatedResult;
     }
   }, []);
 
   const urlParams = new URLSearchParams(window.location.search);
   const hasParams = urlParams.has('x') && urlParams.has('y');
   
-  // Task requirement: Return plain string (no HTML) when parameters present
-  return hasParams ? <PlainResult result={result} /> : <InfoPage />;
+  // If parameters exist, we've already replaced the page content with plain text
+  // Otherwise show info page
+  return hasParams ? null : <InfoPage />;
 };
 
 export default LCMService;
