@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 /* eslint-disable no-undef */
 
@@ -66,71 +66,35 @@ const lcmLogic = {
   }
 };
 
-// Info page when no parameters
-const InfoPage = () => (
-  <div style={{
-    maxWidth: '600px',
-    margin: '40px auto',
-    padding: '20px',
-    fontFamily: 'Arial, sans-serif'
-  }}>
-    <h1>LCM Calculator</h1>
-    <p>HTTP GET method returning LCM of two natural numbers as plain text.</p>
-    
-    <h3>Usage:</h3>
-    <p>Add parameters: <code>?x=[number]&y=[number]</code></p>
-    
-    <h3>Test Examples:</h3>
-    <p><a href="?x=12&y=18">?x=12&y=18</a> → 36</p>
-    <p><a href="?x=0&y=0">?x=0&y=0</a> → 0</p>
-    <p><a href="?x=0&y=5">?x=0&y=5</a> → 0</p>
-    <p><a href="?x={}&y={}">?x={}&y={}</a> → NaN (bot test case)</p>
-    <p><a href="?x=&y=">?x=&y=</a> → NaN (empty params)</p>
-    <p><a href="?x=10asdad&y=5">?x=10asdad&y=5</a> → NaN</p>
-    <p><a href="?x=67280421310721&y=2147483647">Large numbers test</a></p>
-    
-    <h3>Configuration:</h3>
-    <p><strong>Email:</strong> dcumplido04@gmail.com</p>
-    <p><strong>URL ending:</strong> dcumplido04_gmail_com</p>
-    
-    <h3>Rules:</h3>
-    <ul>
-      <li>Returns plain string: digits only or "NaN"</li>
-      <li>Natural numbers: 0, 1, 2, 3, ...</li>
-      <li>Invalid inputs (like "10asdad") return "NaN"</li>
-      <li>Uses BigInt to avoid floating point results</li>
-    </ul>
-  </div>
-);
-
-// Main component - strictly compliant with task
+// Main component - ALWAYS returns plain text
 const LCMService = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     
-    // Only process if BOTH x and y parameters exist
+    let result;
+    
+    // Check if both x and y parameters exist
     if (urlParams.has('x') && urlParams.has('y')) {
       const x = urlParams.get('x');
       const y = urlParams.get('y');
-      
-      const result = lcmLogic.calculate(x, y);
-      
-      // CRITICAL: Replace entire page with plain text result
-      // No HTML, no formatting, just plain string
-      document.body.innerHTML = '';
-      document.body.style.margin = '0';
-      document.body.style.padding = '0';
-      document.body.style.fontFamily = 'monospace';
-      document.body.appendChild(document.createTextNode(result));
-      document.title = result;
+      result = lcmLogic.calculate(x, y);
+    } else {
+      // No parameters or missing parameters - return NaN
+      result = 'NaN';
     }
+    
+    // ALWAYS return plain text - no HTML whatsoever
+    document.body.innerHTML = '';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.fontFamily = 'monospace';
+    document.body.appendChild(document.createTextNode(result));
+    document.title = result;
   }, []);
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const hasParams = urlParams.has('x') && urlParams.has('y');
-  
-  // If parameters exist, page content is already replaced with plain text
-  return hasParams ? null : <InfoPage />;
+  // Never render React components - always return null
+  // The useEffect handles all rendering directly to DOM
+  return null;
 };
 
 export default LCMService;
