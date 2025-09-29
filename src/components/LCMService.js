@@ -28,12 +28,14 @@ const lcmLogic = {
   
   // Strict validation for natural numbers (includes 0)
   isNaturalNumber: (str) => {
-    if (str === null || str === undefined || str === '') return false;
+    // Handle null, undefined, empty string, or just braces
+    if (str === null || str === undefined || str === '' || str === '{}') return false;
     
     const trimmed = String(str).trim();
-    if (trimmed === '') return false;
+    // Empty after trimming or just braces
+    if (trimmed === '' || trimmed === '{}') return false;
     
-    // Must contain ONLY digits - no letters, decimals, signs, spaces
+    // Must contain ONLY digits - no letters, decimals, signs, spaces, braces
     if (!/^\d+$/.test(trimmed)) return false;
     
     try {
@@ -82,6 +84,8 @@ const InfoPage = () => (
     <p><a href="?x=12&y=18">?x=12&y=18</a> → 36</p>
     <p><a href="?x=0&y=0">?x=0&y=0</a> → 0</p>
     <p><a href="?x=0&y=5">?x=0&y=5</a> → 0</p>
+    <p><a href="?x={}&y={}">?x={}&y={}</a> → NaN (bot test case)</p>
+    <p><a href="?x=&y=">?x=&y=</a> → NaN (empty params)</p>
     <p><a href="?x=10asdad&y=5">?x=10asdad&y=5</a> → NaN</p>
     <p><a href="?x=67280421310721&y=2147483647">Large numbers test</a></p>
     
